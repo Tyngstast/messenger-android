@@ -29,9 +29,7 @@ class LoginActivity : AppCompatActivity() {
 
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
             .addOnCompleteListener {
-                if (!it.isSuccessful) {
-                    return@addOnCompleteListener
-                }
+                if (!it.isSuccessful) return@addOnCompleteListener
 
                 Log.d(TAG, "Successfully logged in: ${it.result?.user?.email}")
 

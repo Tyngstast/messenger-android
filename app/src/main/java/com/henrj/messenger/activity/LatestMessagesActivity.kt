@@ -1,9 +1,8 @@
 package com.henrj.messenger.activity
 
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
@@ -17,9 +16,7 @@ class LatestMessagesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_latest_messages)
 
-        val uid = FirebaseAuth.getInstance().uid
-        Log.d(TAG, "Authenticated user: $uid")
-        if (uid.isNullOrBlank()) {
+        if (FirebaseAuth.getInstance().uid.isNullOrBlank()) {
             launchSignInActivity()
         }
     }

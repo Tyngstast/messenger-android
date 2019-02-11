@@ -19,9 +19,8 @@ class UserRowAdapter(val users: List<User?>): RecyclerView.Adapter<UserRowAdapte
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserRowViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val view = layoutInflater.inflate(R.layout.user_row_new_message, parent, false)
-        return UserRowViewHolder(view)
+        return UserRowViewHolder(LayoutInflater.from(parent.context)
+            .inflate(R.layout.user_row_new_message, parent, false))
     }
 
     override fun getItemCount(): Int {
@@ -41,8 +40,7 @@ class UserRowAdapter(val users: List<User?>): RecyclerView.Adapter<UserRowAdapte
         init {
             view.setOnClickListener {
                 val intent = Intent(view.context, ChatLogActivity::class.java)
-//                intent.putExtra(USER_KEY, user?.name)
-                intent.putExtra(USER_KEY, user)
+                    .putExtra(USER_KEY, user)
 
                 view.context.startActivity(intent)
 

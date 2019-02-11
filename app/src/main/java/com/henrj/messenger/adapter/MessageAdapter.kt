@@ -1,15 +1,14 @@
 package com.henrj.messenger.adapter
 
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.henrj.messenger.R
 import com.henrj.messenger.model.ChatMessage
-import kotlinx.android.synthetic.main.othermessage_row.view.*
 import kotlinx.android.synthetic.main.mymessage_row.view.*
+import kotlinx.android.synthetic.main.othermessage_row.view.*
 
 private const val TAG = "MessageAdapter"
 private const val VIEW_TYPE_MY_MESSAGE = 1;
@@ -25,11 +24,12 @@ class MessageAdapter: RecyclerView.Adapter<MessageViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
         return if (viewType == VIEW_TYPE_MY_MESSAGE) {
-            MyMessageViewHolder(layoutInflater.inflate(R.layout.mymessage_row, parent, false))
+            MyMessageViewHolder(LayoutInflater.from(parent.context)
+                .inflate(R.layout.mymessage_row, parent, false))
         } else {
-            OtherMessageViewHolder(layoutInflater.inflate(R.layout.othermessage_row, parent, false))
+            OtherMessageViewHolder(LayoutInflater.from(parent.context)
+                .inflate(R.layout.othermessage_row, parent, false))
         }
     }
 

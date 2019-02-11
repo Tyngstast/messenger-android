@@ -1,11 +1,14 @@
 package com.henrj.messenger.activity
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.henrj.messenger.R
 import com.henrj.messenger.adapter.MessageAdapter
 import com.henrj.messenger.adapter.UserRowAdapter
@@ -18,7 +21,6 @@ private const val TAG = "ChatLogActivity"
 class ChatLogActivity : AppCompatActivity() {
 
     private lateinit var adapter: MessageAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

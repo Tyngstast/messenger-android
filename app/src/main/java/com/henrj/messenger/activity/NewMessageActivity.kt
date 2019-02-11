@@ -22,12 +22,8 @@ class NewMessageActivity : AppCompatActivity() {
 
         supportActionBar?.title = "Select User"
 
-        fetchUsers()
-    }
-
-    private fun fetchUsers() {
-        val reference = FirebaseDatabase.getInstance().getReference("/users")
-        reference.addListenerForSingleValueEvent(usersSingleEventListener)
+        FirebaseDatabase.getInstance().getReference("/users")
+            .addListenerForSingleValueEvent(usersSingleEventListener)
     }
 
     private val usersSingleEventListener = object: ValueEventListener {
@@ -42,8 +38,6 @@ class NewMessageActivity : AppCompatActivity() {
             newmessage_recyclerview.adapter = UserRowAdapter(users)
         }
 
-        override fun onCancelled(databaseError: DatabaseError) {
-            Log.e(TAG, "Error getting database: $databaseError")
-        }
+        override fun onCancelled(databaseError: DatabaseError) {}
     }
 }
