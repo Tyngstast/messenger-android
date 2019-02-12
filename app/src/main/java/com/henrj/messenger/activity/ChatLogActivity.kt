@@ -26,18 +26,18 @@ class ChatLogActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_log)
 
-        val user = intent.getParcelableExtra<User>(UserRowAdapter.USER_KEY)
+        val toUser = intent.getParcelableExtra<User>(UserRowAdapter.USER_KEY)
 
-        supportActionBar?.title = user.name
+        supportActionBar?.title = toUser?.name
 
-        adapter = MessageAdapter()
+        adapter = MessageAdapter(toUser)
         chatlog_recyclerview_messages.adapter = adapter
-        chatlog_recyclerview_messages.scrollToPosition(adapter.itemCount - 1)
 
         chatlog_button_send.setOnClickListener(onSendMessageListener)
 
         FirebaseDatabase.getInstance().getReference("/messages")
             .addChildEventListener(onMessageChildEventListener)
+
     }
 
     private val onMessageChildEventListener = object: ChildEventListener {
@@ -45,6 +45,7 @@ class ChatLogActivity : AppCompatActivity() {
             val chatMessage = dataSnapshot.getValue(ChatMessage::class.java)
             Log.d(TAG, "Chatmessage: ${chatMessage?.text}")
             adapter.addMessage(chatMessage!!)
+            chatlog_recyclerview_messages.scrollToPosition(adapter.itemCount - 1)
         }
 
         override fun onCancelled(p0: DatabaseError) {}
@@ -55,8 +56,6 @@ class ChatLogActivity : AppCompatActivity() {
 
     private val onSendMessageListener = View.OnClickListener {
         if (chatlog_button_send.text.isNullOrEmpty()) return@OnClickListener
-
-        Log.d(TAG, "Send message")
 
         val ref = FirebaseDatabase.getInstance().getReference("/messages").push()
         val fromId = FirebaseAuth.getInstance().uid
@@ -70,9 +69,6 @@ class ChatLogActivity : AppCompatActivity() {
         ref.setValue(chatMessage)
             .addOnSuccessListener { Log.d(TAG, "Saved chatMessage: ${ref.key}") }
             .addOnFailureListener { Log.d(TAG, "Failed to save chatMessage: ${it.message}")}
-            .addOnCompleteListener {
-                chatlog_edittext_message.text.clear()
-                chatlog_recyclerview_messages.scrollToPosition(adapter.itemCount - 1)
-            }
+            .addOnCompleteListener { chatlog_edittext_message.text.clear() }
     }
 }
