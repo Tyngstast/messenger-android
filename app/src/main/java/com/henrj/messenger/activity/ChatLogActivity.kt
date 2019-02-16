@@ -35,7 +35,7 @@ class ChatLogActivity : AppCompatActivity() {
 
         chatlog_button_send.setOnClickListener(onSendMessageListener)
 
-        FirebaseDatabase.getInstance().getReference("/messages")
+        FirebaseDatabase.getInstance().getReference("/user-messages/${LatestMessagesActivity.currentUser.uid}/${toUser.uid}")
             .addChildEventListener(onMessageChildEventListener)
 
     }
@@ -55,20 +55,20 @@ class ChatLogActivity : AppCompatActivity() {
     }
 
     private val onSendMessageListener = View.OnClickListener {
-        if (chatlog_button_send.text.isNullOrEmpty()) return@OnClickListener
+        if (chatlog_edittext_message.text.isNullOrEmpty()) return@OnClickListener
 
-        val ref = FirebaseDatabase.getInstance().getReference("/messages").push()
-        val fromId = FirebaseAuth.getInstance().uid
-
-        if (fromId.isNullOrBlank()) return@OnClickListener
-
+        val fromId = FirebaseAuth.getInstance().uid ?: return@OnClickListener
         val toId = intent.getParcelableExtra<User>(UserRowAdapter.USER_KEY).uid
         val text = chatlog_edittext_message.text.toString()
-        val chatMessage = ChatMessage(ref.key!!, text, fromId, toId)
 
-        ref.setValue(chatMessage)
-            .addOnSuccessListener { Log.d(TAG, "Saved chatMessage: ${ref.key}") }
-            .addOnFailureListener { Log.d(TAG, "Failed to save chatMessage: ${it.message}")}
-            .addOnCompleteListener { chatlog_edittext_message.text.clear() }
+        val fromRef = FirebaseDatabase.getInstance().getReference("/user-messages/$fromId/$toId").push()
+        val toRef = FirebaseDatabase.getInstance().getReference("/user-messages/$toId/$fromId").push()
+
+        val chatMessage = ChatMessage(fromRef.key!!, text, fromId, toId)
+
+        fromRef.setValue(chatMessage).addOnCompleteListener { chatlog_edittext_message.text.clear() }
+        toRef.setValue(chatMessage)
+
+        val latestMessageRef = FirebaseDatabase.getInstance().getReference("latest-messages/$fromId/$toId");
     }
 }

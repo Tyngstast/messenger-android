@@ -1,7 +1,5 @@
 package com.henrj.messenger.model
 
-import java.time.Instant
-
 data class ChatMessage(
     val id: String = "",
     val text: String = "",

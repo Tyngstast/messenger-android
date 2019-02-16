@@ -2,24 +2,27 @@ package com.henrj.messenger.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.renderscript.Sampler
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.henrj.messenger.R
+import com.henrj.messenger.adapter.LatestMessagesAdapter
+import com.henrj.messenger.model.ChatMessage
 import com.henrj.messenger.model.User
+import kotlinx.android.synthetic.main.activity_latest_messages.*
 
 private const val TAG = "LatestMessageActivity"
 
 class LatestMessagesActivity : AppCompatActivity() {
 
+    private lateinit var adapter: LatestMessagesAdapter
+
     companion object {
         lateinit var currentUser: User
+        lateinit var latestMessages: List<ChatMessage?>
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +39,12 @@ class LatestMessagesActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance().getReference("/users/$uid")
             .addListenerForSingleValueEvent(singleUserEventListener)
 
+        FirebaseDatabase.getInstance().getReference("/user-messages/$uid")
+            .addChildEventListener(messageChildEventListener)
+//            .addValueEventListener(messageChildEventListener)
+
+        adapter = LatestMessagesAdapter()
+        latestmessages_recyclerview.adapter = adapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -60,6 +69,42 @@ class LatestMessagesActivity : AppCompatActivity() {
         }
         override fun onCancelled(p0: DatabaseError) {}
     }
+
+    private val messageChildEventListener = object: ChildEventListener {
+        fun getLatest(data: DataSnapshot): ChatMessage? =
+            data.children
+                .map { it.getValue(ChatMessage::class.java) }
+                .sortedByDescending { it?.timestamp }
+                .get(0)
+
+        override fun onChildAdded(data: DataSnapshot, p1: String?) {
+            val message = getLatest(data) ?: return
+            Log.d(TAG, "message added: $message")
+            adapter.addMessage(data.key!!, message)
+        }
+
+        override fun onChildChanged(data: DataSnapshot, p1: String?) {
+            val message = getLatest(data) ?: return
+            Log.d(TAG, "message changed: $message")
+            adapter.addMessage(data.key!!, message)
+        }
+        override fun onChildMoved(p0: DataSnapshot, p1: String?) {}
+        override fun onChildRemoved(p0: DataSnapshot) {}
+        override fun onCancelled(p0: DatabaseError) {}
+    }
+
+//    private val messageChildEventListener = object: ValueEventListener {
+//        override fun onDataChange(data: DataSnapshot) {
+//            latestMessages = data.children
+//                .flatMap { it.children }
+//                .map { it.getValue(ChatMessage::class.java) }
+//                .sortedByDescending { it?.timestamp }
+//                .toList()
+//
+//            Log.d(TAG, "messages: $latestMessages")
+//        }
+//        override fun onCancelled(p0: DatabaseError) {}
+//    }
 
     private fun launchSignInActivity() = startActivity(Intent(this, LoginActivity::class.java)
             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)))
