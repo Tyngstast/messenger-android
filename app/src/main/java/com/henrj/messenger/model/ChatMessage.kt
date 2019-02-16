@@ -5,5 +5,6 @@ data class ChatMessage(
     val text: String = "",
     val fromId: String = "" ,
     val toId: String = "",
-    val timestamp: Long = System.currentTimeMillis() / 1000
+    val timestamp: Long = System.currentTimeMillis() / 1000,
+    var read: Boolean = false
 )

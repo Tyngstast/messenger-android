@@ -1,6 +1,8 @@
 package com.henrj.messenger.adapter
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -49,16 +51,23 @@ class LatestMessagesAdapter: RecyclerView.Adapter<LatestMessagesAdapter.LatestMe
         val chatPartnerId: String
 
         val messageBuilder = StringBuilder()
+        val currentUserId = FirebaseAuth.getInstance().uid
 
-        if (message.fromId == FirebaseAuth.getInstance().uid) {
+        if (message.fromId == currentUserId) {
             chatPartnerId = message.toId
             messageBuilder.append("You: ")
         } else {
             chatPartnerId = message.fromId
         }
 
-        viewHolder.view.latestmessages_textview_name.text = message.id
         viewHolder.view.latestmessages_textview_message.text = messageBuilder.append(message.text).toString()
+        if (!message.read) {
+            viewHolder.view.latestmessages_textview_message.setTextColor(Color.BLACK)
+            viewHolder.view.latestmessages_textview_message.setTypeface(Typeface.DEFAULT_BOLD)
+        }
+        viewHolder.messageId = message.id
+        viewHolder.chatPartnerId = chatPartnerId
+        viewHolder.currentUserId = currentUserId
 
         FirebaseDatabase.getInstance().getReference("/users/${chatPartnerId}")
             .addListenerForSingleValueEvent(object: ValueEventListener {
@@ -72,12 +81,25 @@ class LatestMessagesAdapter: RecyclerView.Adapter<LatestMessagesAdapter.LatestMe
             })
     }
 
-    inner class LatestMessageRowViewHolder(val view: View, var user: User? = null): RecyclerView.ViewHolder(view) {
-
+    inner class LatestMessageRowViewHolder(val view: View,
+                                           var user: User? = null,
+                                           var messageId: String? = null,
+                                           var chatPartnerId: String? = null,
+                                           var currentUserId: String? = null): RecyclerView.ViewHolder(view) {
         init {
             view.setOnClickListener {
                 val intent = Intent(view.context, ChatLogActivity::class.java)
                     .putExtra(USER_KEY, user)
+
+                FirebaseDatabase.getInstance().getReference("/user-messages/$currentUserId/$chatPartnerId")
+                    .orderByChild("id")
+                    .equalTo(messageId)
+                    .addListenerForSingleValueEvent(object: ValueEventListener {
+                        override fun onDataChange(data: DataSnapshot) {
+                            data.children.first().ref.updateChildren(mapOf("read" to true))
+                        }
+                        override fun onCancelled(p0: DatabaseError) {}
+                    })
 
                 view.context.startActivity(intent)
             }

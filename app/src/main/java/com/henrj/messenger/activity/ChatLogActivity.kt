@@ -66,9 +66,9 @@ class ChatLogActivity : AppCompatActivity() {
 
         val chatMessage = ChatMessage(fromRef.key!!, text, fromId, toId)
 
-        fromRef.setValue(chatMessage).addOnCompleteListener { chatlog_edittext_message.text.clear() }
         toRef.setValue(chatMessage)
+        fromRef.setValue(chatMessage.apply { read = true })
 
-        val latestMessageRef = FirebaseDatabase.getInstance().getReference("latest-messages/$fromId/$toId");
+        chatlog_edittext_message.text.clear()
     }
 }
